@@ -1,81 +1,96 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, Button, TextInput, StyleSheet } from 'react-native';
+import { Score } from '@/.expo/types/types'; // Ensure the path to types is correct
 
-interface ScoreSubmissionProps {
-  // Define any props here if needed
-}
+const FeedScreen: React.FC = () => {
+  const [scores, setScores] = useState<Score[]>([]);
 
-const ScoreSubmissionScreen: React.FC<ScoreSubmissionProps> = () => {
-  const [teammate, setTeammate] = useState<string>('');
-  const [opponent1, setOpponent1] = useState<string>('');
-  const [opponent2, setOpponent2] = useState<string>('');
-  const [score, setScore] = useState<string>('');
+  useEffect(() => {
+    const initialScores: Score[] = [
+      {
+        id: '1',
+        teamMate: 'Graham',
+        opponentOne: 'Akea',
+        opponentTwo: 'Chris',
+        yourPoints: 14,
+        opponentsPoints: 0,
+        reactions: [],
+        comments: []
+      }
+    ];
+    setScores(initialScores);
+  }, []);
 
-  const handleSubmit = () => {
-    // Ideally handle the submission to your database here
-    console.log('Submitting:', { teammate, opponent1, opponent2, score });
-    // Reset fields after submission for now
-    setTeammate('');
-    setOpponent1('');
-    setOpponent2('');
-    setScore('');
+  const handleReaction = (id: string, reaction: string): void => {
+    setScores(currentScores =>
+      currentScores.map(score =>
+        score.id === id ? { ...score, reactions: [...score.reactions, reaction] } : score
+      )
+    );
+  };
+
+  const addComment = (id: string, comment: string): void => {
+    if (comment.trim() === '') return; // Prevent empty comments
+    setScores(currentScores =>
+      currentScores.map(score =>
+        score.id === id ? { ...score, comments: [...score.comments, comment] } : score
+      )
+    );
+  };
+
+  const renderItem = ({ item }: { item: Score }) => {
+    const [comment, setComment] = useState('');
+    
+    return (
+      <View style={styles.item}>
+        <Text>{`${item.teamMate} & Gary vs. ${item.opponentOne} & ${item.opponentTwo}`}</Text>
+        <Text>{`Score: ${item.yourPoints} - ${item.opponentsPoints}`}</Text>
+        <View style={styles.reactions}>
+          <Button title="👍" onPress={() => handleReaction(item.id, '👍')} />
+          <Button title="❤️" onPress={() => handleReaction(item.id, '❤️')} />
+          <Button title="😂" onPress={() => handleReaction(item.id, '😂')} />
+        </View>
+        <TextInput
+          placeholder="Add a comment..."
+          value={comment}
+          onChangeText={setComment}
+          style={styles.input}
+        />
+        <Button title="Submit Comment" onPress={() => { addComment(item.id, comment); setComment(''); }} />
+        <Text>Reactions: {item.reactions.join(' ')}</Text>
+        <Text>Comments: {item.comments.join(', ')}</Text>
+      </View>
+    );
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Teammate's Name:</Text>
-      <TextInput
-        style={styles.input}
-        value={teammate}
-        onChangeText={setTeammate}
-        placeholder="Enter your teammate's name"
-      />
-      <Text style={styles.label}>Opponent 1:</Text>
-      <TextInput
-        style={styles.input}
-        value={opponent1}
-        onChangeText={setOpponent1}
-        placeholder="First opponent's name"
-      />
-      <Text style={styles.label}>Opponent 2:</Text>
-      <TextInput
-        style={styles.input}
-        value={opponent2}
-        onChangeText={setOpponent2}
-        placeholder="Second opponent's name"
-      />
-      <Text style={styles.label}>Score:</Text>
-      <TextInput
-        style={styles.input}
-        value={score}
-        onChangeText={setScore}
-        placeholder="Enter the score"
-        keyboardType="numeric"
-      />
-      <Button title="Submit Score" onPress={handleSubmit} />
-    </View>
+    <FlatList
+      data={scores}
+      renderItem={renderItem}
+      keyExtractor={item => item.id}
+    />
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
+  item: {
+    padding: 10,
+    marginVertical: 8,
+    backgroundColor: '#f9f9f9',
+    borderWidth: 1,
+    borderColor: '#ddd'
   },
-  label: {
-    fontWeight: 'bold',
-    marginTop: 20,
+  reactions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10
   },
   input: {
-    width: '100%',
-    height: 40,
-    borderColor: 'gray',
     borderWidth: 1,
+    borderColor: '#ccc',
     padding: 10,
-    marginTop: 5,
+    marginTop: 10
   }
 });
 
-export default ScoreSubmissionScreen;
+export default FeedScreen;

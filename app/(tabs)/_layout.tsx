@@ -3,6 +3,7 @@ import React from 'react';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import ScoreSubmissionScreen from './ScoreSubmissionScreen';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -23,13 +24,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="FeedScreen"
         options={{
-          title: 'Explore',
+          title: 'Feed',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
+            <TabBarIcon name={focused ? 'list' : 'list-outline'} color={color} />
           ),
-        }}      
+        }}
       />
       <Tabs.Screen
         name="tossHome"
@@ -37,6 +38,15 @@ export default function TabLayout() {
           title: 'Toss Home',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="ScoreSubmissionScreen"
+        options={{
+          title: 'Submit Score',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'add-circle' : 'add-circle-outline'} color={color} />
           ),
         }}
       />
