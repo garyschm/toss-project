@@ -1,96 +1,79 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, Button, TextInput, StyleSheet } from 'react-native';
-import { Score } from '@/.expo/types/types'; // Ensure the path to types is correct
+import React, { useState } from 'react';
+import { View, TextInput, Button, StyleSheet } from 'react-native';
 
-const FeedScreen: React.FC = () => {
-  const [scores, setScores] = useState<Score[]>([]);
+export default function ScoreSubmissionScreen() {
+  const [teamMate, setTeamMate] = useState('');
+  const [opponentOne, setOpponentOne] = useState('');
+  const [opponentTwo, setOpponentTwo] = useState('');
+  const [yourPoints, setYourPoints] = useState('');  // State for your team's points
+  const [opponentsPoints, setOpponentsPoints] = useState('');  // State for the opponents' points
 
-  useEffect(() => {
-    const initialScores: Score[] = [
-      {
-        id: '1',
-        teamMate: 'Graham',
-        opponentOne: 'Akea',
-        opponentTwo: 'Chris',
-        yourPoints: 14,
-        opponentsPoints: 0,
-        reactions: [],
-        comments: []
-      }
-    ];
-    setScores(initialScores);
-  }, []);
-
-  const handleReaction = (id: string, reaction: string): void => {
-    setScores(currentScores =>
-      currentScores.map(score =>
-        score.id === id ? { ...score, reactions: [...score.reactions, reaction] } : score
-      )
-    );
-  };
-
-  const addComment = (id: string, comment: string): void => {
-    if (comment.trim() === '') return; // Prevent empty comments
-    setScores(currentScores =>
-      currentScores.map(score =>
-        score.id === id ? { ...score, comments: [...score.comments, comment] } : score
-      )
-    );
-  };
-
-  const renderItem = ({ item }: { item: Score }) => {
-    const [comment, setComment] = useState('');
-    
-    return (
-      <View style={styles.item}>
-        <Text>{`${item.teamMate} & Gary vs. ${item.opponentOne} & ${item.opponentTwo}`}</Text>
-        <Text>{`Score: ${item.yourPoints} - ${item.opponentsPoints}`}</Text>
-        <View style={styles.reactions}>
-          <Button title="👍" onPress={() => handleReaction(item.id, '👍')} />
-          <Button title="❤️" onPress={() => handleReaction(item.id, '❤️')} />
-          <Button title="😂" onPress={() => handleReaction(item.id, '😂')} />
-        </View>
-        <TextInput
-          placeholder="Add a comment..."
-          value={comment}
-          onChangeText={setComment}
-          style={styles.input}
-        />
-        <Button title="Submit Comment" onPress={() => { addComment(item.id, comment); setComment(''); }} />
-        <Text>Reactions: {item.reactions.join(' ')}</Text>
-        <Text>Comments: {item.comments.join(', ')}</Text>
-      </View>
-    );
+  const handleSubmit = () => {
+    // Placeholder for submission logic
+    console.log({
+      teamMate,
+      opponentOne,
+      opponentTwo,
+      yourPoints,
+      opponentsPoints
+    });
+    // Reset fields after submission
+    setTeamMate('');
+    setOpponentOne('');
+    setOpponentTwo('');
+    setYourPoints('');
+    setOpponentsPoints('');
   };
 
   return (
-    <FlatList
-      data={scores}
-      renderItem={renderItem}
-      keyExtractor={item => item.id}
-    />
+    <View style={styles.container}>
+      <TextInput
+        placeholder="Teammate's name"
+        value={teamMate}
+        onChangeText={setTeamMate}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Opponent 1's name"
+        value={opponentOne}
+        onChangeText={setOpponentOne}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Opponent 2's name"
+        value={opponentTwo}
+        onChangeText={setOpponentTwo}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Your Team's Points"
+        value={yourPoints}
+        onChangeText={setYourPoints}
+        keyboardType="numeric"  // Ensures only numbers are entered
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Opponent's Points"
+        value={opponentsPoints}
+        onChangeText={setOpponentsPoints}
+        keyboardType="numeric"  // Ensures only numbers are entered
+        style={styles.input}
+      />
+      <Button title="Submit Score" onPress={handleSubmit} />
+    </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  item: {
-    padding: 10,
-    marginVertical: 8,
-    backgroundColor: '#f9f9f9',
-    borderWidth: 1,
-    borderColor: '#ddd'
-  },
-  reactions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
   },
   input: {
+    height: 40,
+    marginVertical: 12,
     borderWidth: 1,
-    borderColor: '#ccc',
     padding: 10,
-    marginTop: 10
-  }
+  },
 });
-
-export default FeedScreen;
