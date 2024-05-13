@@ -55,7 +55,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="Rankings"
+        name="RankingsScreen"
         options={{
           title: 'Rankings',
           tabBarIcon: ({ color, focused }) => (
