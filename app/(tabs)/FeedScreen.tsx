@@ -7,7 +7,12 @@ const FeedScreen: React.FC = () => {
   // Simulate fetching scores when the component mounts
   useEffect(() => {
     const initialScores: Score[] = [
-      { id: '1', teamMate: 'Alice', opponentOne: 'Bob', opponentTwo: 'Charlie', yourPoints: 10, opponentsPoints: 5, reactions: [], comments: [] }
+      { id: '1', teamMate: 'Alice', opponentOne: 'Bob', opponentTwo: 'Charlie', yourPoints: 10, opponentsPoints: 5, reactions: [], comments: [] },
+      { id: '2', teamMate: 'Alice', opponentOne: 'Bob', opponentTwo: 'Charlie', yourPoints: 10, opponentsPoints: 5, reactions: [], comments: [] },
+      { id: '3', teamMate: 'Alice', opponentOne: 'Bob', opponentTwo: 'Charlie', yourPoints: 10, opponentsPoints: 5, reactions: [], comments: [] },
+      { id: '4', teamMate: 'Alice', opponentOne: 'Bob', opponentTwo: 'Charlie', yourPoints: 10, opponentsPoints: 5, reactions: [], comments: [] },
+      { id: '5', teamMate: 'Alice', opponentOne: 'Bob', opponentTwo: 'Charlie', yourPoints: 10, opponentsPoints: 5, reactions: [], comments: [] },
+      { id: '6', teamMate: 'Alice', opponentOne: 'Bob', opponentTwo: 'Charlie', yourPoints: 10, opponentsPoints: 5, reactions: [], comments: [] }
     ];
     setScores(initialScores);
   }, []);
