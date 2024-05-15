@@ -1,7 +1,8 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-//import { FontAwesome } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 // ^ additional import to include new component 
 
 import { Colors } from '@/constants/Colors';
@@ -19,9 +20,9 @@ export default function TabLayout() {
         headerShown: false,
       }}>
       <Tabs.Screen
-        name="index"
+        name="login"
         options={{
-          title: 'Home',
+          title: 'Login',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
           ),
@@ -39,7 +40,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="tossHome"
         options={{
-          title: 'Toss Home',
+          title: 'Login',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
           ),
@@ -59,11 +60,25 @@ export default function TabLayout() {
         options={{
           title: 'Rankings',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'add-circle' : 'add-circle-outline'} color={color} />
+            <TabBarIcon name={focused ? 'trophy' : 'trophy-outline'} color={color} />
             //might need to import FontAwesome for this, 
             //but its fire trust {focused ? 'add-th-list' : 'add-th-list-outline'}
             //<FontAwesome name={focused ? 'list-alt' : 'list'} color={color} size={size} />
 
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profilepage"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? 'person' : 'person-outline'}
+              size={24}
+              color={color}
+              style={{ marginBottom: -3 }}
+            />
           ),
         }}
       />
