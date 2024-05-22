@@ -15,6 +15,7 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
+        tabBarShowLabel: false, // This line removes the labels from all tabs
       }}>
       <Tabs.Screen
         name="login"
@@ -48,7 +49,7 @@ export default function TabLayout() {
         options={{
           title: 'Rankings',
           tabBarIcon: ({ color, focused }) => (
-            <FontAwesome name={focused ? 'list-alt' : 'list'} color={color} size={24} />
+            <Ionicons name={focused ? 'trophy' : 'trophy-outline'} color={color} size={24} />
           ),
         }}
       />

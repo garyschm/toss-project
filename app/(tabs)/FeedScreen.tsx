@@ -24,6 +24,8 @@ const FeedScreen: React.FC = () => {
   const [selectedScoreId, setSelectedScoreId] = useState<string | null>(null);
   const [visibleComments, setVisibleComments] = useState<{ [key: string]: boolean }>({});
   const [showMessage, setShowMessage] = useState<boolean>(true);
+  const [buttonsVisible, setButtonsVisible] = useState<boolean>(true);
+  const [bannerVisible, setBannerVisible] = useState<boolean>(false);
 
   useEffect(() => {
     const initialScores: Score[] = [
@@ -75,6 +77,13 @@ const FeedScreen: React.FC = () => {
 
   const hideMessage = () => {
     setShowMessage(false);
+    setBannerVisible(false);
+    setButtonsVisible(true);
+  };
+
+  const handleButtonClick = () => {
+    setButtonsVisible(false);
+    setBannerVisible(true);
   };
 
   const renderItem = ({ item }: { item: Score }) => (
@@ -126,7 +135,12 @@ const FeedScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {showMessage && (
+      {buttonsVisible && (
+        <TouchableOpacity style={styles.needButton} onPress={handleButtonClick}>
+          <Text style={styles.needButtonText}>Need 1</Text>
+        </TouchableOpacity>
+      )}
+      {bannerVisible && (
         <View style={styles.fixedMessage}>
           <Text style={styles.fixedMessageText}>Need 1!</Text>
           <TouchableOpacity onPress={hideMessage} style={styles.closeButton}>
@@ -179,7 +193,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   list: {
-    paddingTop: 60,
+    paddingTop: 10, // Reduced space between the button and the first game
     paddingBottom: 20,
   },
   item: {
@@ -198,6 +212,32 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 2,
+  },
+  needButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#00aa00', // Changed color
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2,
+    shadowColor: '#000', // Added shadow properties
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  
+  needButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   teamRow: {
     flexDirection: 'row',
