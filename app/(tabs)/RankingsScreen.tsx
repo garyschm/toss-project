@@ -24,7 +24,7 @@ const RankingsScreen = () => {
           <View key={item.id} style={styles.item}>
             <Text style={styles.rank}>#{item.id}</Text>
             <Text style={styles.name}>{item.name}</Text>
-            <Text style={styles.score}>Score: {item.score}</Text>
+            <Text style={styles.score}>ELO Score: {item.score}</Text>
             <Text style={styles.record}>Record: {item.record}</Text>
           </View>
         ))}
@@ -34,61 +34,62 @@ const RankingsScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: '#fff',
-    },
-    header: {
-      padding: 10,
-      backgroundColor: '#eaeaea',
-    },
-    title: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      textAlign: 'center',
-    },
-    scrollContainer: {
-      flex: 1,
-    },
-    // item: {
-    //   backgroundColor: '#f0f0f0',
-    //   padding: 10,
-    //   marginBottom: 10,
-    //   borderRadius: 5,
-    // },
-    item: {
-        backgroundColor: '#ffffff',  // Using a white background for each item
-        borderRadius: 8,             // Rounded corners
-        padding: 16,                 // Adequate padding inside each item
-        marginBottom: 10,            // Space between items
-        marginHorizontal: 10,        // Horizontal space for better focus on items
-        shadowColor: '#000',         // Shadow color
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,          // Light shadow for depth
-        shadowRadius: 6,             // Soften the shadow
-        elevation: 3,                // Elevation for Android
-      },      
-      rank: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#333',  // Darker color for better readability
-      },
-      name: {
-        fontSize: 18,
-        fontWeight: '500',
-        color: '#555',
-        marginTop: 4,   // Space between the rank and name
-      },
-      score: {
-        fontSize: 16,
-        color: '#666',
-        marginTop: 4,
-      },
-      record: {
-        fontSize: 16,
-        color: '#666',
-        marginTop: 4,
-      },      
-  });
-  
-  export default RankingsScreen;
+  container: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
+  header: {
+    padding: 10,
+    backgroundColor: '#00aa00',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#ffffff',
+  },
+  scrollContainer: {
+    flex: 1,
+    paddingHorizontal: 10,
+    paddingTop: 10,
+  },
+  item: {
+    backgroundColor: '#ffffff',  // Using a white background for each item
+    borderRadius: 8,             // Rounded corners
+    padding: 16,                 // Adequate padding inside each item
+    marginBottom: 10,            // Space between items
+    shadowColor: '#000',         // Shadow color
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,          // Light shadow for depth
+    shadowRadius: 6,             // Soften the shadow
+    elevation: 3,                // Elevation for Android
+  },
+  rank: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#343a40',  // Darker color for better readability
+  },
+  name: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#495057',
+    marginTop: 4,   // Space between the rank and name
+  },
+  score: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 4,
+  },
+  record: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 4,
+  },
+});
+
+export default RankingsScreen;
