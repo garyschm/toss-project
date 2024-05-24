@@ -11,6 +11,8 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 
+const db = admin.firestore();
+
 const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers.authorization;
   if (!token) return res.status(403).send('Token is missing');
@@ -24,4 +26,5 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default verifyToken;
+export { verifyToken, db };
+//export default verifyToken;

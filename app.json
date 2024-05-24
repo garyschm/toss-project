@@ -13,7 +13,9 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.gs-ap-gg-cd.toss",
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
@@ -31,6 +33,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "53ca4a9f-e2a3-4130-99ba-783c3342bec3"
+      }
     }
   }
 }

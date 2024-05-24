@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Ionicons } from '@expo/vector-icons';
 import { FontAwesome } from '@expo/vector-icons';
@@ -10,8 +10,21 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import ScoreSubmissionScreen from './ScoreSubmissionScreen';
 //likely do not need to include to maintain the integrity of the file 
 
+//import firebase
+
+import { getApps, initializeApp } from 'firebase/app'
+import { firebaseConfig } from '@/firebaseConfig';
+
+
+
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+
+  if (getApps().length < 1) {
+    initializeApp(firebaseConfig);
+  }
+
 
   return (
     <Tabs
