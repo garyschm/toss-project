@@ -2,10 +2,17 @@ import admin from 'firebase-admin';
 import { Request, Response, NextFunction } from 'express';
 import { ServiceAccount } from 'firebase-admin';
 import dotenv from 'dotenv';
+import fs from 'fs';
 
 dotenv.config();
 
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT as string) as ServiceAccount;
+const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH as string;
+
+if (!serviceAccountPath) {
+  throw new Error("FIREBASE_SERVICE_ACCOUNT_PATH environment variable is not set");
+}
+
+const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8')) as ServiceAccount;
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
