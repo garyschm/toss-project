@@ -1,17 +1,24 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import {
+  FIREBASE_API_KEY,
+  FIREBASE_AUTH_DOMAIN,
+  FIREBASE_PROJECT_ID,
+  FIREBASE_STORAGE_BUCKET,
+  FIREBASE_MESSAGING_SENDER_ID,
+  FIREBASE_APP_ID,
+} from '@env';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyBzBKYBTVOSxTuribs6rlQgBynuTA0UZiw",
-    authDomain: "toss-799fe.firebaseapp.com",
-    projectId: "toss-799fe",
-    storageBucket: "toss-799fe.appspot.com",
-    messagingSenderId: "944692851950",
-    appId: "1:944692851950:web:8d06bc3767e11bb4286fff",
-    measurementId: "G-T4910X6BL6"
-  };
+  apiKey: FIREBASE_API_KEY,
+  authDomain: FIREBASE_AUTH_DOMAIN,
+  projectId: FIREBASE_PROJECT_ID,
+  storageBucket: FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: FIREBASE_MESSAGING_SENDER_ID,
+  appId: FIREBASE_APP_ID,
+};
 
 
 
