@@ -1,11 +1,33 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { getUserData } from '@/firestoreService';
 
 const ProfileScreen = () => {
   // Import your profile photo from local assets
   const profilePhoto = require('@/assets/images/gary.jpeg');
-  const username = "GaryCantPlayDie"; // Example username
+  const [username, setUsername] = useState('Loading ...');
+  const [elo, setElo] = useState('Loading...');
+  //const username = "GaryCantPlayDie"; // Example username
+  const [record, setRecord] = useState({wins: 0, losses: 0 });
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userId = 'mWlktXPmmRePf8SuhA8H'; // Replace with dynamic user ID as necessary
+        const data = await getUserData(userId);
+        if (data) {
+          setUsername(data.username || 'No username');
+          setElo(data.elo || 'No elo');
+          setRecord({ wins: data.wins || 0, losses: data.losses || 0 });
+        }
+      } catch (error) {
+        Alert.alert('Error', 'Failed to load user data');
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -18,12 +40,12 @@ const ProfileScreen = () => {
       </View>
       <View style={styles.userDetails}>
         <Ionicons name="podium-outline" size={24} color="white" style={styles.icon} />
-        <Text style={styles.eloText}>1350 elo</Text>
+        <Text style={styles.eloText}>{elo} ELO</Text>
       </View>
       <View style={styles.profileInfo}>
         <Text style={styles.recordText}>
-          <Text style={styles.wins}>66W</Text> -
-          <Text style={styles.losses}> 15L</Text>
+          <Text style={styles.wins}>{record.wins}W</Text> -
+          <Text style={styles.losses}>{record.losses}L</Text>
         </Text>
       </View>
     </View>
