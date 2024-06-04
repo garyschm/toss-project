@@ -46,6 +46,8 @@ const FeedScreen: React.FC = () => {
             comments: data.comments ?? []
           };
         });
+        // Sort scores by timestamp in descending order
+        scoresList.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
         setScores(scoresList);
       } catch (error) {
         console.error("Error fetching scores: ", error);
@@ -178,6 +180,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
+    paddingTop: 40,
   },
   fixedMessage: {
     position: 'absolute',
