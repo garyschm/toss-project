@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { db } from '../../firebaseConfig'; // Make sure this path is correct
+import { collection, getDocs } from 'firebase/firestore';
 
 interface Score {
   id: string;
-  teamMateOne: string;
-  teamMateTwo: string;
-  opponentOne: string;
-  opponentTwo: string;
-  yourPoints: number;
-  opponentsPoints: number;
-  date: string;
+  team1: string[];
+  team1Score: number;
+  team2: string[];
+  team2Score: number;
+  timestamp: string;
+  winnerTeam: string;
   reactions: { [key: string]: number };
   comments: string[];
 }
@@ -28,15 +29,30 @@ const FeedScreen: React.FC = () => {
   const [bannerVisible, setBannerVisible] = useState<boolean>(false);
 
   useEffect(() => {
-    const initialScores: Score[] = [
-      { id: '1', teamMateOne: 'Alice', teamMateTwo: 'John', opponentOne: 'Bob', opponentTwo: 'Charlie', yourPoints: 10, opponentsPoints: 5, date: '2024-05-01', reactions: {}, comments: [] },
-      { id: '2', teamMateOne: 'David', teamMateTwo: 'Emma', opponentOne: 'Frank', opponentTwo: 'Grace', yourPoints: 8, opponentsPoints: 10, date: '2024-05-02', reactions: {}, comments: [] },
-      { id: '3', teamMateOne: 'Henry', teamMateTwo: 'Ivy', opponentOne: 'Jack', opponentTwo: 'Kelly', yourPoints: 15, opponentsPoints: 12, date: '2024-05-03', reactions: {}, comments: [] },
-      { id: '4', teamMateOne: 'Liam', teamMateTwo: 'Mia', opponentOne: 'Nathan', opponentTwo: 'Olivia', yourPoints: 7, opponentsPoints: 9, date: '2024-05-04', reactions: {}, comments: [] },
-      { id: '5', teamMateOne: 'Oscar', teamMateTwo: 'Pam', opponentOne: 'Quinn', opponentTwo: 'Rita', yourPoints: 11, opponentsPoints: 8, date: '2024-05-05', reactions: {}, comments: [] },
-      { id: '6', teamMateOne: 'Sam', teamMateTwo: 'Tina', opponentOne: 'Uma', opponentTwo: 'Victor', yourPoints: 13, opponentsPoints: 10, date: '2024-05-06', reactions: {}, comments: [] }
-    ];
-    setScores(initialScores);
+    const fetchScores = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'games'));
+        const scoresList: Score[] = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            team1: data.team1 ?? [],
+            team1Score: data.team1Score ?? 0,
+            team2: data.team2 ?? [],
+            team2Score: data.team2Score ?? 0,
+            timestamp: data.timestamp?.toDate().toString() ?? '',
+            winnerTeam: data.winnerTeam ?? '',
+            reactions: data.reactions ?? {},
+            comments: data.comments ?? []
+          };
+        });
+        setScores(scoresList);
+      } catch (error) {
+        console.error("Error fetching scores: ", error);
+      }
+    };
+
+    fetchScores();
   }, []);
 
   const handleReaction = (id: string, type: ReactionType): void => {
@@ -90,17 +106,17 @@ const FeedScreen: React.FC = () => {
     <View style={styles.item}>
       <View style={styles.teamRow}>
         <View style={styles.teamColumn}>
-          <Text style={styles.team}>{item.teamMateOne}</Text>
-          <Text style={styles.team}>{item.teamMateTwo}</Text>
+          <Text style={styles.team}>{item.team1[0]}</Text>
+          <Text style={styles.team}>{item.team1[1]}</Text>
         </View>
         <Text style={styles.vs}>vs.</Text>
         <View style={styles.teamColumn}>
-          <Text style={styles.team}>{item.opponentOne}</Text>
-          <Text style={styles.team}>{item.opponentTwo}</Text>
+          <Text style={styles.team}>{item.team2[0]}</Text>
+          <Text style={styles.team}>{item.team2[1]}</Text>
         </View>
       </View>
-      <Text style={styles.score}>{`${item.yourPoints} - ${item.opponentsPoints}`}</Text>
-      <Text style={styles.date}>{item.date}</Text>
+      <Text style={styles.score}>{`${item.team1Score} - ${item.team2Score}`}</Text>
+      <Text style={styles.date}>{item.timestamp}</Text>
       <View style={styles.reactionContainer}>
         {reactionTypes.map(reaction => (
           <TouchableOpacity key={reaction} onPress={() => handleReaction(item.id, reaction)} style={styles.reactionButton}>
