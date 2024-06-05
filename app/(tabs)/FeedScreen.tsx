@@ -21,6 +21,7 @@ type ReactionType = typeof reactionTypes[number];
 
 const FeedScreen: React.FC = () => {
   const [scores, setScores] = useState<Score[]>([]);
+  const [userMap, setUserMap] = useState< { [key: string]: string}>({});
   const [newComment, setNewComment] = useState<string>('');
   const [selectedScoreId, setSelectedScoreId] = useState<string | null>(null);
   const [visibleComments, setVisibleComments] = useState<{ [key: string]: boolean }>({});
@@ -54,7 +55,22 @@ const FeedScreen: React.FC = () => {
       }
     };
 
+    const fetchUsers = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'users'));
+        const userMap: { [key: string]: string } = {};
+        querySnapshot.forEach(doc => {
+          const data = doc.data();
+          userMap[doc.id] = data.username;
+        });
+        setUserMap(userMap);
+      } catch (error) {
+        console.error("Error fetching users: ", error);
+      }
+    };
+
     fetchScores();
+    fetchUsers();
   }, []);
 
   const handleReaction = (id: string, type: ReactionType): void => {
@@ -108,13 +124,13 @@ const FeedScreen: React.FC = () => {
     <View style={styles.item}>
       <View style={styles.teamRow}>
         <View style={styles.teamColumn}>
-          <Text style={styles.team}>{item.team1[0]}</Text>
-          <Text style={styles.team}>{item.team1[1]}</Text>
+          <Text style={styles.team}>{userMap[item.team1[0]]}</Text>
+          <Text style={styles.team}>{userMap[item.team1[1]]}</Text>
         </View>
         <Text style={styles.vs}>vs.</Text>
         <View style={styles.teamColumn}>
-          <Text style={styles.team}>{item.team2[0]}</Text>
-          <Text style={styles.team}>{item.team2[1]}</Text>
+          <Text style={styles.team}>{userMap[item.team2[0]]}</Text>
+          <Text style={styles.team}>{userMap[item.team2[1]]}</Text>
         </View>
       </View>
       <Text style={styles.score}>{`${item.team1Score} - ${item.team2Score}`}</Text>

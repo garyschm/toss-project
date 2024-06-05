@@ -4,7 +4,6 @@ import RNPickerSelect from 'react-native-picker-select';
 import { db } from '../../firebaseConfig'; // Ensure the correct path
 import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 
-
 interface User {
   id: string;
   username: string;
@@ -19,7 +18,6 @@ export default function ScoreSubmissionScreen() {
   const [team1Score, setTeam1Score] = useState('');
   const [team2Score, setTeam2Score] = useState('');
 
-  
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -36,8 +34,7 @@ export default function ScoreSubmissionScreen() {
 
     fetchUsers();
   }, []);
-  
-  
+
   const validateScores = (team1Score: number, team2Score: number): boolean => {
     const scoreDifference = Math.abs(team1Score - team2Score);
 
@@ -75,15 +72,14 @@ export default function ScoreSubmissionScreen() {
       return;
     }
 
-
-    const winnerTeam = parseInt(team1Score) > parseInt(team2Score) ? 'team1' : 'team2';
+    const winnerTeam = team1ScoreNum > team2ScoreNum ? 'team1' : 'team2';
 
     try {
       await addDoc(collection(db, 'games'), {
         team1: [team1Player1, team1Player2],
-        team1Score: parseInt(team1Score),
+        team1Score: team1ScoreNum,
         team2: [team2Player1, team2Player2],
-        team2Score: parseInt(team2Score),
+        team2Score: team2ScoreNum,
         winnerTeam,
         timestamp: serverTimestamp(),
         reactions: {},
@@ -92,10 +88,10 @@ export default function ScoreSubmissionScreen() {
       Alert.alert("Success", "Game data submitted successfully");
 
       // Reset fields after submission
-      setTeam1Player1('');
-      setTeam1Player2('');
-      setTeam2Player1('');
-      setTeam2Player2('');
+      setTeam1Player1(null);
+      setTeam1Player2(null);
+      setTeam2Player1(null);
+      setTeam2Player2(null);
       setTeam1Score('');
       setTeam2Score('');
     } catch (error) {
@@ -104,32 +100,40 @@ export default function ScoreSubmissionScreen() {
     }
   };
 
+  const getFilteredUsers = (excludedIds: string[]): { label: string; value: string }[] => {
+    return users
+      .filter(user => !excludedIds.includes(user.id))
+      .map(user => ({ label: user.username, value: user.id }));
+  };
+
+  const exclusionList = [team1Player1, team1Player2, team2Player1, team2Player2].filter((id): id is string => id !== null);
+
   return (
     <View style={styles.container}>
       <RNPickerSelect
         onValueChange={value => setTeam1Player1(value)}
-        items={users.map(user => ({ label: user.username, value: user.id }))}
+        items={getFilteredUsers(exclusionList.filter(id => id !== team1Player1))}
         placeholder={{ label: 'Select Team 1 Player 1', value: null }}
         value={team1Player1}
         style={pickerSelectStyles}
       />
       <RNPickerSelect
         onValueChange={value => setTeam1Player2(value)}
-        items={users.map(user => ({ label: user.username, value: user.id }))}
+        items={getFilteredUsers(exclusionList.filter(id => id !== team1Player2))}
         placeholder={{ label: 'Select Team 1 Player 2', value: null }}
         value={team1Player2}
         style={pickerSelectStyles}
       />
       <RNPickerSelect
         onValueChange={value => setTeam2Player1(value)}
-        items={users.map(user => ({ label: user.username, value: user.id }))}
+        items={getFilteredUsers(exclusionList.filter(id => id !== team2Player1))}
         placeholder={{ label: 'Select Team 2 Player 1', value: null }}
         value={team2Player1}
         style={pickerSelectStyles}
       />
       <RNPickerSelect
         onValueChange={value => setTeam2Player2(value)}
-        items={users.map(user => ({ label: user.username, value: user.id }))}
+        items={getFilteredUsers(exclusionList.filter(id => id !== team2Player2))}
         placeholder={{ label: 'Select Team 2 Player 2', value: null }}
         value={team2Player2}
         style={pickerSelectStyles}
