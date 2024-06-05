@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import {Alert} from 'react-native';
-import { View, Text, StyleSheet, TextInput, TouchableHighlight } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableHighlight, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'; // Import NativeStackNavigationProp
+import { RootStackParamList } from '../../types/types'; // Adjust the path as necessary
+
+type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'LoginScreen'>;
 
 const LoginScreen = () => {
+    const navigation = useNavigation<LoginScreenNavigationProp>(); // Initialize useNavigation hook with type
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [buttonPressed, setButtonPressed] = useState(false);
@@ -79,24 +85,26 @@ const LoginScreen = () => {
                 />
             </View>
             <TouchableHighlight
-                activeOpacity={1}
-                underlayColor="#88dd88"
-                onPressIn={handlePressIn}
-                onPressOut={handlePressOut}
-                onPress={handleLogin}
-                style={[
-                    styles.loginButton,
-                    { backgroundColor: buttonPressed ? '#007700' : '#00aa00' },
-                ]}
-            >
-                <Text style={styles.loginButtonText}>Get Tossin'</Text>
-            </TouchableHighlight>
-            <View style={styles.signupContainer}>
-                <Text style={styles.signupText}>Don't have an account?</Text>
-                <Text style={styles.signupLink}>Sign up</Text>
-            </View>
-        </View>
-    );
+        activeOpacity={1}
+        underlayColor="#88dd88"
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        onPress={handleLogin}
+        style={[
+          styles.loginButton,
+          { backgroundColor: buttonPressed ? '#007700' : '#00aa00' },
+        ]}
+      >
+        <Text style={styles.loginButtonText}>Get Tossin'</Text>
+        </TouchableHighlight>
+      <View style={styles.signupContainer}>
+        <Text style={styles.signupText}>Don't have an account?</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('SignUpScreen')}>
+          <Text style={styles.signupLink}>Sign up</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 };
 
 
