@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import {Alert} from 'react-native';
-import { View, Text, StyleSheet, TextInput, TouchableHighlight, TouchableOpacity } from 'react-native';
+import { Alert, View, Text, StyleSheet, TextInput, TouchableHighlight, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'; // Import NativeStackNavigationProp
@@ -29,36 +28,26 @@ const LoginScreen = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({email, password}),
-        });
+                body: JSON.stringify({ email, password }),
+            });
 
-        const contentType = response.headers.get('content-type');
+            const data = await response.json(); // Fetch the response data
 
-        if (!contentType || !contentType.includes('application/json')) {
-            const text = await response.text();
-            throw new Error(`Unexpected response content type: ${contentType}, response: ${text}`);
-        }
-
-        const data = await response.json();
-
-        if (response.ok) {
-            // succesful login
-            Alert.alert('Success', 'User signed in succesfully!');
-            // Navigate to next screen or update state as needed
-        } else {
-            // login error handling
-            Alert.alert('Error', data.message || 'Error signing in');
-        }
-    } catch (error) {
-        if (error instanceof Error) {
-            Alert.alert('Error', error.message || 'Error signing in');
-        } else {
-            Alert.alert('Error', 'Unknown error occured');
-        }
-        
-
+            if (response.ok) {
+                Alert.alert('Success', 'User signed in successfully!');
+                navigation.navigate('FeedScreen'); // Navigate to FeedScreen on success
+            } else {
+                Alert.alert('Error', data.message || 'Error signing in');
+            }
+        } catch (error) {
+            if (error instanceof Error) {
+                Alert.alert('Error', error.message || 'Error signing in');
+            } else {
+                Alert.alert('Error', 'Unknown error occurred');
+            }
         }
     };
+
     return (
         <View style={styles.container}>
             <Text style={styles.logo}>
@@ -85,28 +74,27 @@ const LoginScreen = () => {
                 />
             </View>
             <TouchableHighlight
-        activeOpacity={1}
-        underlayColor="#88dd88"
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        onPress={handleLogin}
-        style={[
-          styles.loginButton,
-          { backgroundColor: buttonPressed ? '#007700' : '#00aa00' },
-        ]}
-      >
-        <Text style={styles.loginButtonText}>Get Tossin'</Text>
-        </TouchableHighlight>
-      <View style={styles.signupContainer}>
-        <Text style={styles.signupText}>Don't have an account?</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('SignUpScreen')}>
-          <Text style={styles.signupLink}>Sign up</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+                activeOpacity={1}
+                underlayColor="#88dd88"
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+                onPress={handleLogin}
+                style={[
+                    styles.loginButton,
+                    { backgroundColor: buttonPressed ? '#007700' : '#00aa00' },
+                ]}
+            >
+                <Text style={styles.loginButtonText}>Get Tossin'</Text>
+            </TouchableHighlight>
+            <View style={styles.signupContainer}>
+                <Text style={styles.signupText}>Don't have an account?</Text>
+                <TouchableOpacity onPress={() => navigation.navigate('SignUpScreen')}>
+                    <Text style={styles.signupLink}>Sign up</Text>
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
 };
-
 
 const styles = StyleSheet.create({
     container: {
