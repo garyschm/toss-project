@@ -44,7 +44,10 @@ const SignUpScreen = () => {
       if (response.ok) {
         // Successful sign up
         Alert.alert('Success', 'User signed up successfully!');
-        navigation.navigate('FeedScreen'); // Navigate to FeedScreen after sign up
+        navigation.reset({
+          index: 0,
+          routes: [{ name: '(tabs)' }],
+        });
       } else {
         // Sign up error handling
         Alert.alert('Error', data.message || 'Error signing up');
