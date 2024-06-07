@@ -25,7 +25,7 @@ export default function RootLayout() {
 
     if (loaded) {
       SplashScreen.hideAsync();
-      router.replace('/(tabs)/login'); // Redirect to login screen
+      router.replace('/auth/login'); // Redirect to login screen
     }
   }, [loaded]);
 
@@ -36,6 +36,7 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
+        <Stack.Screen name="auth" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>

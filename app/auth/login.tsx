@@ -35,7 +35,10 @@ const LoginScreen = () => {
 
             if (response.ok) {
                 Alert.alert('Success', 'User signed in successfully!');
-                navigation.navigate('FeedScreen'); // Navigate to FeedScreen on success
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: '(tabs)' }],
+                });
             } else {
                 Alert.alert('Error', data.message || 'Error signing in');
             }

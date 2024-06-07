@@ -1,19 +1,11 @@
 import { Tabs } from 'expo-router';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Ionicons } from '@expo/vector-icons';
-import { FontAwesome } from '@expo/vector-icons'; // Additional import to include new component
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import ScoreSubmissionScreen from './ScoreSubmissionScreen'; // Likely not needed to include to maintain the integrity of the file
-
-//import firebase
-
-import { getApps, initializeApp } from 'firebase/app'
+import { getApps, initializeApp } from 'firebase/app';
 import { firebaseConfig } from '@/firebaseConfig';
-
-
-
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -22,7 +14,6 @@ export default function TabLayout() {
     initializeApp(firebaseConfig);
   }
 
-
   return (
     <Tabs
       screenOptions={{
@@ -30,15 +21,6 @@ export default function TabLayout() {
         headerShown: false,
         tabBarShowLabel: false, // This line removes the labels from all tabs
       }}>
-      <Tabs.Screen
-        name="login"
-        options={{
-          title: 'Login',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
-          ),
-        }}
-      />
       <Tabs.Screen
         name="FeedScreen"
         options={{

@@ -4,4 +4,5 @@ export type RootStackParamList = {
     SignUpScreen: undefined;
     FeedScreen:undefined;
     '+not-found': undefined;
+    '(tabs)': undefined; 
   };
