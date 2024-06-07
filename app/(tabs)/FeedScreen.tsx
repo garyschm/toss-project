@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Dimensions, RefreshControl, Modal, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { db } from '../../firebaseConfig'; // Make sure this path is correct
 import { collection, getDocs } from 'firebase/firestore';
+import { Picker } from '@react-native-picker/picker';
 
 interface Score {
   id: string;
@@ -19,59 +20,71 @@ interface Score {
 const reactionTypes = ['heart-outline'] as const;
 type ReactionType = typeof reactionTypes[number];
 
+const reportReasons = [
+  'Unsportsmanlike Conduct',
+  'Incorrect Score',
+  'Harassment',
+  'Cheating'
+] as const;
+type ReportReason = typeof reportReasons[number];
+
 const FeedScreen: React.FC = () => {
   const [scores, setScores] = useState<Score[]>([]);
-  const [userMap, setUserMap] = useState< { [key: string]: string}>({});
+  const [userMap, setUserMap] = useState<{ [key: string]: string }>({});
   const [newComment, setNewComment] = useState<string>('');
   const [selectedScoreId, setSelectedScoreId] = useState<string | null>(null);
   const [visibleComments, setVisibleComments] = useState<{ [key: string]: boolean }>({});
   const [showMessage, setShowMessage] = useState<boolean>(true);
   const [buttonsVisible, setButtonsVisible] = useState<boolean>(true);
   const [bannerVisible, setBannerVisible] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [selectedReason, setSelectedReason] = useState<ReportReason>('Unsportsmanlike Conduct');
+  const [additionalComments, setAdditionalComments] = useState<string>('');
+
+  const fetchScores = useCallback(async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'games'));
+      const scoresList: Score[] = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          team1: data.team1 ?? [],
+          team1Score: data.team1Score ?? 0,
+          team2: data.team2 ?? [],
+          team2Score: data.team2Score ?? 0,
+          timestamp: data.timestamp?.toDate().toString() ?? '',
+          winnerTeam: data.winnerTeam ?? '',
+          reactions: data.reactions ?? {},
+          comments: data.comments ?? []
+        };
+      });
+      // Sort scores by timestamp in descending order
+      scoresList.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      setScores(scoresList);
+    } catch (error) {
+      console.error("Error fetching scores: ", error);
+    }
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'users'));
+      const userMap: { [key: string]: string } = {};
+      querySnapshot.forEach(doc => {
+        const data = doc.data();
+        userMap[doc.id] = data.username;
+      });
+      setUserMap(userMap);
+    } catch (error) {
+      console.error("Error fetching users: ", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchScores = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'games'));
-        const scoresList: Score[] = querySnapshot.docs.map(doc => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            team1: data.team1 ?? [],
-            team1Score: data.team1Score ?? 0,
-            team2: data.team2 ?? [],
-            team2Score: data.team2Score ?? 0,
-            timestamp: data.timestamp?.toDate().toString() ?? '',
-            winnerTeam: data.winnerTeam ?? '',
-            reactions: data.reactions ?? {},
-            comments: data.comments ?? []
-          };
-        });
-        // Sort scores by timestamp in descending order
-        scoresList.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-        setScores(scoresList);
-      } catch (error) {
-        console.error("Error fetching scores: ", error);
-      }
-    };
-
-    const fetchUsers = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'users'));
-        const userMap: { [key: string]: string } = {};
-        querySnapshot.forEach(doc => {
-          const data = doc.data();
-          userMap[doc.id] = data.username;
-        });
-        setUserMap(userMap);
-      } catch (error) {
-        console.error("Error fetching users: ", error);
-      }
-    };
-
     fetchScores();
     fetchUsers();
-  }, []);
+  }, [fetchScores]);
 
   const handleReaction = (id: string, type: ReactionType): void => {
     setScores(currentScores =>
@@ -120,6 +133,18 @@ const FeedScreen: React.FC = () => {
     setBannerVisible(true);
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchScores();
+    setRefreshing(false);
+  };
+
+  const handleReport = () => {
+    Alert.alert("Report submitted");
+    setModalVisible(false);
+    setAdditionalComments('');
+  };
+
   const renderItem = ({ item }: { item: Score }) => (
     <View style={styles.item}>
       <View style={styles.teamRow}>
@@ -135,13 +160,18 @@ const FeedScreen: React.FC = () => {
       </View>
       <Text style={styles.score}>{`${item.team1Score} - ${item.team2Score}`}</Text>
       <Text style={styles.date}>{item.timestamp}</Text>
-      <View style={styles.reactionContainer}>
-        {reactionTypes.map(reaction => (
-          <TouchableOpacity key={reaction} onPress={() => handleReaction(item.id, reaction)} style={styles.reactionButton}>
-            <Ionicons name={item.reactions[reaction] ? 'heart' : 'heart-outline'} size={24} color={item.reactions[reaction] ? '#e91e63' : 'black'} />
-            <Text style={styles.reactionCount}>{item.reactions[reaction] || 0}</Text>
-          </TouchableOpacity>
-        ))}
+      <View style={styles.actionRow}>
+        <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.reportButton}>
+          <Ionicons name="flag-outline" size={24} color="black" />
+        </TouchableOpacity>
+        <View style={styles.reactionContainer}>
+          {reactionTypes.map(reaction => (
+            <TouchableOpacity key={reaction} onPress={() => handleReaction(item.id, reaction)} style={styles.reactionButton}>
+              <Ionicons name={item.reactions[reaction] ? 'heart' : 'heart-outline'} size={24} color={item.reactions[reaction] ? '#e91e63' : 'black'} />
+              <Text style={styles.reactionCount}>{item.reactions[reaction] || 0}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
       <TouchableOpacity style={styles.commentButton} onPress={() => toggleCommentsVisibility(item.id)}>
         <Text style={styles.commentButtonText}>Comments</Text>
@@ -187,7 +217,42 @@ const FeedScreen: React.FC = () => {
         renderItem={renderItem}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       />
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Report</Text>
+            <Picker
+              selectedValue={selectedReason}
+              onValueChange={(itemValue) => setSelectedReason(itemValue as ReportReason)}
+              style={styles.picker}
+            >
+              {reportReasons.map((reason) => (
+                <Picker.Item key={reason} label={reason} value={reason} />
+              ))}
+            </Picker>
+            <Text style={styles.modalText}>Do you have any additional comments?</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Add your comments here"
+              multiline
+              value={additionalComments}
+              onChangeText={setAdditionalComments}
+            />
+            <TouchableOpacity style={styles.submitButton} onPress={handleReport}>
+              <Text style={styles.submitButtonText}>Submit Report</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -268,11 +333,19 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  
   needButtonText: {
     color: '#fff',
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  reportButton: {
+    padding: 10,
   },
   teamRow: {
     flexDirection: 'row',
@@ -309,8 +382,7 @@ const styles = StyleSheet.create({
   },
   reactionContainer: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginVertical: 10,
+    alignItems: 'center',
   },
   reactionButton: {
     flexDirection: 'row',
@@ -360,6 +432,53 @@ const styles = StyleSheet.create({
     marginVertical: 2,
     borderRadius: 3,
     color: '#212529',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  picker: {
+    width: '100%',
+    marginVertical: 10,
+  },
+  modalText: {
+    fontSize: 16,
+    marginVertical: 10,
+  },
+  modalInput: {
+    width: '100%',
+    height: 100,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginVertical: 10,
+  },
+  submitButton: {
+    marginTop: 20,
+    backgroundColor: '#00aa00',
+    padding: 10,
+    borderRadius: 5,
+    width: '100%',
+  },
+  submitButtonText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
 });
 
