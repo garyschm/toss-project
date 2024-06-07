@@ -1,11 +1,26 @@
-// app/(tabs)/SignUpScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity, Text, Alert, TouchableHighlight } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'; // Import NativeStackNavigationProp
+import { RootStackParamList } from '../../types/types'; // Adjust the path as necessary
+
+type SignUpScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'SignUpScreen'>;
 
 const SignUpScreen = () => {
+  const navigation = useNavigation<SignUpScreenNavigationProp>(); // Initialize useNavigation hook with type
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [buttonPressed, setButtonPressed] = useState(false);
+
+  const handlePressIn = () => {
+    setButtonPressed(true);
+  };
+
+  const handlePressOut = () => {
+    setButtonPressed(false);
+  };
 
   const handleSignUp = async () => {
     try {
@@ -29,7 +44,7 @@ const SignUpScreen = () => {
       if (response.ok) {
         // Successful sign up
         Alert.alert('Success', 'User signed up successfully!');
-        // Navigate to next screen or update state as needed
+        navigation.navigate('FeedScreen'); // Navigate to FeedScreen after sign up
       } else {
         // Sign up error handling
         Alert.alert('Error', data.message || 'Error signing up');
@@ -45,36 +60,56 @@ const SignUpScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Sign Up</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        autoCapitalize="none"
-        autoCorrect={false}
-        value={username}
-        onChangeText={setUsername}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoCorrect={false}
-        value={email}
-        onChangeText={setEmail}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        autoCapitalize="none"
-        autoCorrect={false}
-        value={password}
-        onChangeText={setPassword}
-      />
-      <TouchableOpacity style={styles.button} onPress={handleSignUp}>
-        <Text style={styles.buttonText}>Sign Up</Text>
-      </TouchableOpacity>
+      <Text style={styles.logo}>
+        T<Ionicons name="dice-outline" size={50} color="black" />ss
+      </Text>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          autoCapitalize="none"
+          autoCorrect={false}
+          value={username}
+          onChangeText={setUsername}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+          value={email}
+          onChangeText={setEmail}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry
+          autoCapitalize="none"
+          autoCorrect={false}
+          value={password}
+          onChangeText={setPassword}
+        />
+      </View>
+      <TouchableHighlight
+        activeOpacity={1}
+        underlayColor="#88dd88"
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        onPress={handleSignUp}
+        style={[
+          styles.signupButton,
+          { backgroundColor: buttonPressed ? '#007700' : '#00aa00' },
+        ]}
+      >
+        <Text style={styles.signupButtonText}>Sign Up</Text>
+      </TouchableHighlight>
+      <View style={styles.loginContainer}>
+        <Text style={styles.loginText}>Already have an account?</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')}>
+          <Text style={styles.loginLink}>Login</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -82,36 +117,49 @@ const SignUpScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#ffffff',
   },
-  title: {
-    fontSize: 32,
+  logo: {
+    fontSize: 80,
     fontWeight: 'bold',
-    marginBottom: 20,
+    textAlign: 'center',
+  },
+  inputContainer: {
+    width: '80%',
+    marginTop: 30,
   },
   input: {
-    width: '100%',
-    height: 50,
     backgroundColor: '#f2f2f2',
     padding: 10,
     marginBottom: 20,
     borderRadius: 5,
   },
-  button: {
-    width: '100%',
-    height: 50,
+  signupButton: {
     backgroundColor: '#00aa00',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 5,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 30, // Round button
   },
-  buttonText: {
+  signupButtonText: {
     color: '#ffffff',
     fontSize: 18,
     fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  loginContainer: {
+    flexDirection: 'row',
+    marginTop: 40,
+  },
+  loginText: {
+    fontSize: 14,
+  },
+  loginLink: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginLeft: 5,
+    textDecorationLine: 'underline',
   },
 });
 

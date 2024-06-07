@@ -1,24 +1,31 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { initializeApp } from 'firebase/app';
+import { firebaseConfig } from '../firebaseConfig'; // Ensure the correct path to your Firebase config
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const router = useRouter();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
   useEffect(() => {
+    // Initialize Firebase
+    initializeApp(firebaseConfig);
+
     if (loaded) {
       SplashScreen.hideAsync();
+      router.replace('/(tabs)/login'); // Redirect to login screen
     }
   }, [loaded]);
 
@@ -26,13 +33,10 @@ export default function RootLayout() {
     return null;
   }
 
-  //potentially add to stack screen: <Stack.Screen name="SignUpScreen" options={{ headerShown: true, title: 'Sign Up' }} />
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false}} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        
         <Stack.Screen name="+not-found" />
       </Stack>
     </ThemeProvider>
