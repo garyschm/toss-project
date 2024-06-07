@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, TouchableOpacity, Text, Alert } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity, Text, Alert } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import { db } from '../../firebaseConfig'; // Ensure the correct path
 import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -17,6 +17,7 @@ export default function ScoreSubmissionScreen() {
   const [team2Player2, setTeam2Player2] = useState<string | null>(null);
   const [team1Score, setTeam1Score] = useState('');
   const [team2Score, setTeam2Score] = useState('');
+  const [matchType, setMatchType] = useState<string | null>(null); // new state for match type
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -54,6 +55,11 @@ export default function ScoreSubmissionScreen() {
   };
 
   const handleSubmit = async () => {
+    if (!matchType) {
+      Alert.alert("Error", "Please mark the match as ranked or unranked");
+      return;
+    }
+
     if (!team1Player1 || !team1Player2 || !team2Player1 || !team2Player2 || !team1Score || !team2Score) {
       Alert.alert("Error", "Please fill in all fields");
       return;
@@ -83,7 +89,8 @@ export default function ScoreSubmissionScreen() {
         winnerTeam,
         timestamp: serverTimestamp(),
         reactions: {},
-        comments: []
+        comments: [],
+        matchType, // include match type
       });
       Alert.alert("Success", "Game data submitted successfully");
 
@@ -94,6 +101,7 @@ export default function ScoreSubmissionScreen() {
       setTeam2Player2(null);
       setTeam1Score('');
       setTeam2Score('');
+      setMatchType(null); // reset match type
     } catch (error) {
       console.error("Error adding document: ", error);
       Alert.alert("Error", "Failed to submit game data");
@@ -110,6 +118,20 @@ export default function ScoreSubmissionScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.matchTypeContainer}>
+        <TouchableOpacity
+          style={[styles.matchTypeButton, matchType === 'ranked' && styles.matchTypeButtonSelected]}
+          onPress={() => setMatchType('ranked')}
+        >
+          <Text style={[styles.matchTypeButtonText, matchType === 'ranked' && styles.matchTypeButtonTextSelected]}>Ranked</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.matchTypeButton, matchType === 'unranked' && styles.matchTypeButtonSelected]}
+          onPress={() => setMatchType('unranked')}
+        >
+          <Text style={[styles.matchTypeButtonText, matchType === 'unranked' && styles.matchTypeButtonTextSelected]}>Unranked</Text>
+        </TouchableOpacity>
+      </View>
       <RNPickerSelect
         onValueChange={value => setTeam1Player1(value)}
         items={getFilteredUsers(exclusionList.filter(id => id !== team1Player1))}
@@ -199,6 +221,37 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  matchTypeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  matchTypeButton: {
+    flex: 1,
+    padding: 10,
+    marginHorizontal: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ced4da',
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  matchTypeButtonSelected: {
+    backgroundColor: '#00aa00',
+  },
+  matchTypeButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#6c757d',
+  },
+  matchTypeButtonTextSelected: {
+    color: '#fff',
   },
 });
 
