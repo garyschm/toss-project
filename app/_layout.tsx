@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
+
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from '../firebaseConfig'; // Ensure the correct path to your Firebase config

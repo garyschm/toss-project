@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Dimensions, RefreshControl, Modal, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { db } from '../../firebaseConfig'; // Make sure this path is correct
-import { collection, getDocs } from 'firebase/firestore';
+import { db, auth } from '../../firebaseConfig'; // Ensure auth is imported
+import { collection, getDocs, updateDoc, doc, increment } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 import { Picker } from '@react-native-picker/picker';
+
 
 interface Score {
   id: string;
@@ -15,6 +17,7 @@ interface Score {
   winnerTeam: string;
   reactions: { [key: string]: number };
   comments: string[];
+  likes: { [key: string]: boolean }; // Store user likes
 }
 
 const reactionTypes = ['heart-outline'] as const;
@@ -40,6 +43,7 @@ const FeedScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [selectedReason, setSelectedReason] = useState<ReportReason>('Unsportsmanlike Conduct');
   const [additionalComments, setAdditionalComments] = useState<string>('');
+  const [user, setUser] = useState<any>(null); // Track the current user
 
   const fetchScores = useCallback(async () => {
     try {
@@ -55,10 +59,10 @@ const FeedScreen: React.FC = () => {
           timestamp: data.timestamp?.toDate().toString() ?? '',
           winnerTeam: data.winnerTeam ?? '',
           reactions: data.reactions ?? {},
-          comments: data.comments ?? []
+          comments: data.comments ?? [],
+          likes: data.likes ?? {}, // Add likes to the data
         };
       });
-      // Sort scores by timestamp in descending order
       scoresList.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       setScores(scoresList);
     } catch (error) {
@@ -81,18 +85,38 @@ const FeedScreen: React.FC = () => {
   };
 
   useEffect(() => {
+    onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
     fetchScores();
     fetchUsers();
   }, [fetchScores]);
 
-  const handleReaction = (id: string, type: ReactionType): void => {
+  const handleReaction = async (id: string, type: ReactionType): Promise<void> => {
+    if (!user) {
+      Alert.alert('Error', 'You need to be logged in to like a game');
+      return;
+    }
+
     setScores(currentScores =>
       currentScores.map(score =>
-        score.id === id
-          ? { ...score, reactions: { ...score.reactions, [type]: (score.reactions[type] || 0) + 1 } }
+        score.id === id && !score.likes[user.uid]
+          ? {
+              ...score,
+              reactions: { ...score.reactions, [type]: (score.reactions[type] || 0) + 1 },
+              likes: { ...score.likes, [user.uid]: true },
+            }
           : score
       )
     );
+
+    // Update Firestore
+    const scoreDoc = doc(db, 'games', id);
+    await updateDoc(scoreDoc, {
+      [`reactions.${type}`]: increment(1),
+      [`likes.${user.uid}`]: true,
+    });
   };
 
   const addComment = (id: string): void => {
@@ -164,8 +188,17 @@ const FeedScreen: React.FC = () => {
         </TouchableOpacity>
         <View style={styles.reactionContainer}>
           {reactionTypes.map(reaction => (
-            <TouchableOpacity key={reaction} onPress={() => handleReaction(item.id, reaction)} style={styles.reactionButton}>
-              <Ionicons name={item.reactions[reaction] ? 'heart' : 'heart-outline'} size={24} color={item.reactions[reaction] ? '#e91e63' : 'black'} />
+            <TouchableOpacity
+              key={reaction}
+              onPress={() => handleReaction(item.id, reaction)}
+              style={styles.reactionButton}
+              disabled={item.likes[user?.uid]} // Disable button if the user has already liked
+            >
+              <Ionicons
+                name={item.reactions[reaction] ? 'heart' : 'heart-outline'}
+                size={24}
+                color={item.reactions[reaction] ? '#e91e63' : 'black'}
+              />
               <Text style={styles.reactionCount}>{item.reactions[reaction] || 0}</Text>
             </TouchableOpacity>
           ))}
@@ -291,7 +324,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   list: {
-    paddingTop: 100, // Increased padding top to create space for the Need 1 button
+    paddingTop: 100,
     paddingBottom: 20,
   },
   item: {
@@ -313,16 +346,16 @@ const styles = StyleSheet.create({
   },
   needButton: {
     position: 'absolute',
-    top: 80, // Adjusted position to be below the time display
+    top: 80,
     left: 20,
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#00aa00', // Changed color
+    backgroundColor: '#00aa00',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 2,
-    shadowColor: '#000', // Added shadow properties
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -344,14 +377,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#00aa00',
     borderRadius: 5,
     marginHorizontal: 16,
-    marginTop: 50, // Added marginTop to create space below the top
+    marginTop: 50,
   },
   notificationText: {
     color: '#fff',
-    fontSize: 16, // Increased font size
+    fontSize: 16,
     fontWeight: 'bold',
-    textAlign: 'center', // Centered text
-    flex: 1, // Added flex to make the text take available space
+    textAlign: 'center',
+    flex: 1,
   },
   dismissButton: {
     marginLeft: 10,
