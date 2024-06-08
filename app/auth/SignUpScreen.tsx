@@ -3,14 +3,16 @@ import { Alert, View, Text, StyleSheet, TextInput, TouchableHighlight, Touchable
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../types/types'; // Adjust the path as necessary
-import { auth } from '../../firebaseConfig'; // Adjust the path as necessary
+import { RootStackParamList } from '../../types/types';
+import { auth, db } from '../../firebaseConfig'; // Ensure db is imported
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { collection, addDoc } from 'firebase/firestore';
 
 type SignUpScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'SignUpScreen'>;
 
 const SignUpScreen = () => {
     const navigation = useNavigation<SignUpScreenNavigationProp>();
+    const [username, setUsername] = useState(''); // New state for username
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -30,9 +32,24 @@ const SignUpScreen = () => {
             return;
         }
 
+        if (username.trim() === '') {
+            Alert.alert('Error', 'Username cannot be empty');
+            return;
+        }
+
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
+
+            // Save the username in Firestore
+            await addDoc(collection(db, 'users'), {
+                uid: user.uid,
+                username,
+                email,
+                elo: 1400, // Default elo
+                wins: 0,
+                losses: 0,
+            });
 
             Alert.alert('Success', 'User registered successfully!');
             navigation.reset({
@@ -55,6 +72,14 @@ const SignUpScreen = () => {
                 T<Ionicons name="dice-outline" size={50} color="black" />ss
             </Text>
             <View style={styles.inputContainer}>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Username" // New TextInput for username
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    value={username}
+                    onChangeText={setUsername}
+                />
                 <TextInput
                     style={styles.input}
                     placeholder="Email"
@@ -132,7 +157,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#00aa00',
         paddingVertical: 15,
         paddingHorizontal: 30,
-        borderRadius: 30, // Round button
+        borderRadius: 30,
     },
     signupButtonText: {
         color: '#ffffff',
