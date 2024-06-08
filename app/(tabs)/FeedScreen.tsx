@@ -34,14 +34,12 @@ const FeedScreen: React.FC = () => {
   const [newComment, setNewComment] = useState<string>('');
   const [selectedScoreId, setSelectedScoreId] = useState<string | null>(null);
   const [visibleComments, setVisibleComments] = useState<{ [key: string]: boolean }>({});
-  const [showMessage, setShowMessage] = useState<boolean>(true);
   const [buttonsVisible, setButtonsVisible] = useState<boolean>(true);
   const [bannerVisible, setBannerVisible] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [selectedReason, setSelectedReason] = useState<ReportReason>('Unsportsmanlike Conduct');
   const [additionalComments, setAdditionalComments] = useState<string>('');
-  const [notificationVisible, setNotificationVisible] = useState<boolean>(false); // New state variable
 
   const fetchScores = useCallback(async () => {
     try {
@@ -123,17 +121,14 @@ const FeedScreen: React.FC = () => {
     setSelectedScoreId(id);
   };
 
-  const hideMessage = () => {
-    setShowMessage(false);
-    setBannerVisible(false);
-    setButtonsVisible(true);
-  };
-
   const handleButtonClick = () => {
     setButtonsVisible(false);
     setBannerVisible(true);
-    setNotificationVisible(true); // Show notification message
-    setTimeout(() => setNotificationVisible(false), 3000); // Hide notification after 3 seconds
+  };
+
+  const hideMessage = () => {
+    setBannerVisible(false);
+    setButtonsVisible(true);
   };
 
   const onRefresh = async () => {
@@ -208,16 +203,11 @@ const FeedScreen: React.FC = () => {
         </TouchableOpacity>
       )}
       {bannerVisible && (
-        <View style={styles.fixedMessage}>
-          <Text style={styles.fixedMessageText}>Need 1!</Text>
-          <TouchableOpacity onPress={hideMessage} style={styles.closeButton}>
-            <Ionicons name="checkmark" size={24} color="#ffffff" />
-          </TouchableOpacity>
-        </View>
-      )}
-      {notificationVisible && (
         <View style={styles.notification}>
           <Text style={styles.notificationText}>Players have been notified!</Text>
+          <TouchableOpacity onPress={hideMessage} style={styles.dismissButton}>
+            <Ionicons name="checkmark" size={24} color="white" />
+          </TouchableOpacity>
         </View>
       )}
       <FlatList
@@ -347,16 +337,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   notification: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 10,
     backgroundColor: '#00aa00',
     borderRadius: 5,
     marginHorizontal: 16,
-    marginVertical: 10,
+    marginTop: 50, // Added marginTop to create space below the top
   },
   notificationText: {
     color: '#fff',
-    textAlign: 'center',
+    fontSize: 16, // Increased font size
     fontWeight: 'bold',
+    textAlign: 'center', // Centered text
+    flex: 1, // Added flex to make the text take available space
+  },
+  dismissButton: {
+    marginLeft: 10,
   },
   actionRow: {
     flexDirection: 'row',
