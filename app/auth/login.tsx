@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { Alert, View, Text, StyleSheet, TextInput, TouchableHighlight, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation hook
-import { NativeStackNavigationProp } from '@react-navigation/native-stack'; // Import NativeStackNavigationProp
-import { RootStackParamList } from '../../types/types'; // Adjust the path as necessary
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../types/types';
+import { auth } from '../../firebaseConfig';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'LoginScreen'>;
 
 const LoginScreen = () => {
-    const navigation = useNavigation<LoginScreenNavigationProp>(); // Initialize useNavigation hook with type
+    const navigation = useNavigation<LoginScreenNavigationProp>();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [buttonPressed, setButtonPressed] = useState(false);
@@ -23,25 +25,14 @@ const LoginScreen = () => {
 
     const handleLogin = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/auth/sign-in', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            Alert.alert('Success', 'User signed in successfully!');
+            navigation.reset({
+                index: 0,
+                routes: [{ name: '(tabs)' }],
             });
-
-            const data = await response.json(); // Fetch the response data
-
-            if (response.ok) {
-                Alert.alert('Success', 'User signed in successfully!');
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: '(tabs)' }],
-                });
-            } else {
-                Alert.alert('Error', data.message || 'Error signing in');
-            }
         } catch (error) {
             if (error instanceof Error) {
                 Alert.alert('Error', error.message || 'Error signing in');
