@@ -41,6 +41,7 @@ const FeedScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [selectedReason, setSelectedReason] = useState<ReportReason>('Unsportsmanlike Conduct');
   const [additionalComments, setAdditionalComments] = useState<string>('');
+  const [notificationVisible, setNotificationVisible] = useState<boolean>(false); // New state variable
 
   const fetchScores = useCallback(async () => {
     try {
@@ -131,6 +132,8 @@ const FeedScreen: React.FC = () => {
   const handleButtonClick = () => {
     setButtonsVisible(false);
     setBannerVisible(true);
+    setNotificationVisible(true); // Show notification message
+    setTimeout(() => setNotificationVisible(false), 3000); // Hide notification after 3 seconds
   };
 
   const onRefresh = async () => {
@@ -210,6 +213,11 @@ const FeedScreen: React.FC = () => {
           <TouchableOpacity onPress={hideMessage} style={styles.closeButton}>
             <Ionicons name="checkmark" size={24} color="#ffffff" />
           </TouchableOpacity>
+        </View>
+      )}
+      {notificationVisible && (
+        <View style={styles.notification}>
+          <Text style={styles.notificationText}>Players have been notified!</Text>
         </View>
       )}
       <FlatList
@@ -293,7 +301,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   list: {
-    paddingTop: 10, // Reduced space between the button and the first game
+    paddingTop: 100, // Increased padding top to create space for the Need 1 button
     paddingBottom: 20,
   },
   item: {
@@ -315,7 +323,7 @@ const styles = StyleSheet.create({
   },
   needButton: {
     position: 'absolute',
-    top: 20,
+    top: 80, // Adjusted position to be below the time display
     left: 20,
     width: 60,
     height: 60,
@@ -336,6 +344,18 @@ const styles = StyleSheet.create({
   needButtonText: {
     color: '#fff',
     fontSize: 14,
+    fontWeight: 'bold',
+  },
+  notification: {
+    padding: 10,
+    backgroundColor: '#00aa00',
+    borderRadius: 5,
+    marginHorizontal: 16,
+    marginVertical: 10,
+  },
+  notificationText: {
+    color: '#fff',
+    textAlign: 'center',
     fontWeight: 'bold',
   },
   actionRow: {
